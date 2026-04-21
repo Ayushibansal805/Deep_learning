@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Brain Tumor Detection</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins';transition:.3s;overflow-x:hidden,overflow-y:auto;}
+
+/* 🔥 DARK DEFAULT */
+body.dark{
+    background:linear-gradient(135deg,#020617,#0f172a);
+    color:#e2e8f0;
+}
+
+/* LAYOUT */
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:40px 20px;
+}
+.card{
+    backdrop-filter:blur(15px);
+    background:rgba(15,23,42,.85);
+    border-radius:20px;
+    padding:25px;
+    width:850px;
+    box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+
+/* TITLE */
+.title{
+    font-family:'Orbitron';
+    text-align:center;
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+/* GRID */
+.main{display:flex;gap:20px;}
+.left{flex:1}
+.right{flex:1}
+
+/* DROP ZONE */
+.drop-zone{
+    border:2px dashed #38bdf8;
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+    cursor:pointer;
+}
+
+/* BUTTON */
+button{
+    margin-top:10px;
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    background:#38bdf8;
+    color:white;
+    cursor:pointer;
+}
+
+/* RESULT */
+.bar{height:8px;background:#1e293b;border-radius:10px;margin:5px 0}
+.fill{height:100%;background:#38bdf8;border-radius:10px;width:0;transition:1s}
+
+/* INFO */
+.info{margin-top:10px;font-size:13px;opacity:.8}
+
+/* TOUR */
+.tour-overlay{
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.6);   /* 🔥 THIS WAS MISSING */
+    z-index: 9999;
+}
+
+/* SPOTLIGHT */
+.spotlight{
+    position:absolute;
+    border-radius:12px;
+    background: transparent;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.6);
+    border:2px solid #38bdf8;
+    transition: all 0.4s ease;
+}
+
+/* PULSE */
+@keyframes pulse{
+    0%{box-shadow:0 0 0 9999px rgba(0,0,0,.75),0 0 5px #38bdf8;}
+    50%{box-shadow:0 0 0 9999px rgba(0,0,0,.75),0 0 20px #38bdf8;}
+    100%{box-shadow:0 0 0 9999px rgba(0,0,0,.75),0 0 5px #38bdf8;}
+}
+
+/* ARROW */
+.arrow{
+    position:absolute;
+    width:0;height:0;
+    border-left:12px solid transparent;
+    border-right:12px solid transparent;
+    border-bottom:18px solid #38bdf8;
+    animation:bounce 1s infinite;
+}
+
+@keyframes bounce{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-10px)}
+}
+
+/* TOUR BOX */
+.tour-box{
+    position:absolute;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    width:320px;
+    text-align:center;
+}
+
+/* DOTS */
+.dots span{margin:0 3px;opacity:.4;}
+.dots .active{opacity:1}
+</style>
+</head>
+
+<body class="dark">
+
+<!-- TOUR -->
+<div id="tourOverlay" class="tour-overlay">
+    <div id="spotlight" class="spotlight"></div>
+    <div id="arrow" class="arrow"></div>
+
+    <div class="tour-box">
+        <p id="tourText"></p>
+        <div id="dots" class="dots"></div>
+
+        <button onclick="nextTour()">Next</button>
+        <button onclick="skipTour()">Skip</button>
+    </div>
+</div>
+
+<div class="container">
+<div class="card">
+
+<h1 class="title">🧠 Brain Tumor Detection</h1>
+
+<div class="main">
+
+<div class="left">
+<form id="form">
+
+<div class="drop-zone" id="uploadArea">
+Click or Drag Image
+<input type="file" id="fileInput" hidden>
+</div>
+
+<img id="preview" style="display:none">
+
+<button id="predictBtn" type="submit">Predict</button>
+
+</form>
+</div>
+
+<div class="right">
+
+<div id="result" style="display:none">
+<h2 id="resultText"></h2>
+<p id="confidenceText"></p>
+<div id="probabilities"></div>
+</div>
+
+<div class="info">
+Model: CNN | Input: 256x256 | Classes: 4
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+const fileInput=document.getElementById("fileInput");
+const dropZone=document.getElementById("uploadArea");
+const preview=document.getElementById("preview");
+
+dropZone.onclick=()=>fileInput.click();
+
+fileInput.addEventListener("change",showPreview);
+
+dropZone.addEventListener("drop",e=>{
+e.preventDefault();
+fileInput.files=e.dataTransfer.files;
+showPreview();
+});
+
+function showPreview(){
+const file=fileInput.files[0];
+preview.src=URL.createObjectURL(file);
+preview.style.display="block";
+}
+
+/* PREDICT */
+document.getElementById("form").addEventListener("submit",async(e)=>{
+e.preventDefault();
+
+const file=fileInput.files[0];
+if(!file) return alert("Upload image first");
+
+const formData=new FormData();
+formData.append("file",file);
+
+const res=await fetch("/predict",{method:"POST",body:formData});
+const data=await res.json();
+
+document.getElementById("result").style.display="block";
+document.getElementById("resultText").innerText=data.prediction;
+document.getElementById("confidenceText").innerText=data.confidence+"%";
+
+let html="";
+data.probabilities.forEach(p=>{
+html+=`
+<div>${p.label}
+<div class="bar"><div class="fill" style="width:${p.value}%"></div></div>
+</div>`;
+});
+document.getElementById("probabilities").innerHTML=html;
+});
+
+/* TOUR */
+
+
+
+function nextTour(){
+step++;
+if(step>=steps.length){
+endTour();
+}else showStep();
+}
+
+function skipTour(){endTour();}
+
+function endTour(){
+document.getElementById("tourOverlay").style.display="none";
+localStorage.setItem("seenTour","true");
+}
+
+window.onload=()=>{
+if(localStorage.getItem("seenTour")){
+document.getElementById("tourOverlay").style.display="none";
+}else showStep();
+};
+</script>
+
+</body>
+</html>
