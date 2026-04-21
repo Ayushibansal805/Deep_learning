@@ -1,7 +1,11 @@
 pandas
 scikit-learn
 seaborn
-tensorflow
 tensorboard
 streamlit
 numpy
+Flask
+numpy
+pillow
+tensorflow
+gunicorn
