@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing import image
 app = Flask(__name__)
 
 # Load model
-MODEL_PATH = r"C:\Users\HP\Desktop\Deep_learning\brain_tumor_model1.h5"
+MODEL_PATH = "brain_tumor_model1.h5"
 
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
