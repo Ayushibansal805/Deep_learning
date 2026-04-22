@@ -17,7 +17,7 @@ print("File exists:", os.path.exists(MODEL_PATH))
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
 
-model = load_model(MODEL_PATH)
+model = load_model(MODEL_PATH, compile=False)  # Avoid potential issues with custom objects
 
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
