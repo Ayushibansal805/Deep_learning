@@ -22,7 +22,7 @@ model = load_model(MODEL_PATH, compile=False)  # Avoid potential issues with cus
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
 
-model = load_model(MODEL_PATH)
+
 
 # ⚠️ IMPORTANT: Set this SAME as training
 IMG_SIZE = (256, 256, 3)   # <-- change if your model used different size
