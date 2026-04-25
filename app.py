@@ -9,7 +9,7 @@ app = Flask(__name__)
 # Load model
 # Load model
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "brain_tumor_model.h5")
+MODEL_PATH = os.path.join(BASE_DIR, "brain_tumor_model1.h5")
 
 print("Looking for model at:", MODEL_PATH)
 print("File exists:", os.path.exists(MODEL_PATH))
