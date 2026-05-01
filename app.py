@@ -28,7 +28,7 @@ if not os.path.exists(MODEL_PATH):
 IMG_SIZE = (256, 256, 3)   # <-- change if your model used different size
 
 # ⚠️ MUST match training class order
-class_names = ["glioma", "meningioma", "pituitary", "notumor"]
+class_names = ["glioma", "meningioma", "notumor", "pituitary"]
 
 def preprocess(img_path):
     img = image.load_img(img_path, target_size=IMG_SIZE)

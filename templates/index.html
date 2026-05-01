@@ -237,14 +237,78 @@ document.getElementById("probabilities").innerHTML=html;
 });
 
 /* TOUR */
+let step=0;
 
+const steps=[
+    {
+        title:"Upload Image",
+        text:"Click or drag an MRI image here to start brain tumor detection",
+        element:"uploadArea",
+        position:"bottom"
+    },
+    {
+        title:"Make Prediction",
+        text:"Click the Predict button to analyze the uploaded image using our CNN model",
+        element:"predictBtn",
+        position:"bottom"
+    },
+    {
+        title:"View Results",
+        text:"See the detected tumor type and confidence level with detailed probability breakdown",
+        element:"result",
+        position:"left"
+    }
+];
 
+function showStep(){
+if(step>=steps.length) {
+endTour();
+return;
+}
+
+const currentStep=steps[step];
+const element=document.getElementById(currentStep.element);
+
+if(!element) {
+step++;
+showStep();
+return;
+}
+
+const rect=element.getBoundingClientRect();
+const spotlight=document.getElementById("spotlight");
+const tourBox=document.querySelector(".tour-box");
+const tourText=document.getElementById("tourText");
+const dots=document.getElementById("dots");
+
+// Position spotlight
+spotlight.style.left=(rect.left-5)+"px";
+spotlight.style.top=(rect.top-5)+"px";
+spotlight.style.width=(rect.width+10)+"px";
+spotlight.style.height=(rect.height+10)+"px";
+
+// Update text
+tourText.innerHTML=`<strong>${currentStep.title}</strong><br>${currentStep.text}`;
+
+// Update dots
+dots.innerHTML="";
+steps.forEach((s,i)=>{
+const dot=document.createElement("span");
+dot.className=i===step?"active":"";
+dots.appendChild(dot);
+});
+
+// Position tour box
+tourBox.style.left="50%";
+tourBox.style.transform="translateX(-50%)";
+
+// Show tour overlay
+document.getElementById("tourOverlay").style.display="block";
+}
 
 function nextTour(){
 step++;
-if(step>=steps.length){
-endTour();
-}else showStep();
+showStep();
 }
 
 function skipTour(){endTour();}
@@ -257,7 +321,9 @@ localStorage.setItem("seenTour","true");
 window.onload=()=>{
 if(localStorage.getItem("seenTour")){
 document.getElementById("tourOverlay").style.display="none";
-}else showStep();
+}else{
+setTimeout(showStep,500);
+}
 };
 </script>
 
